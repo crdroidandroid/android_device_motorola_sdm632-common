@@ -476,52 +476,6 @@ if [ "$ProductName" == "msmnile" ] || [ "$ProductName" == "kona" ] || [ "$Produc
       configure_zram_parameters
       configure_read_ahead_kb_values
       echo 0 > /proc/sys/vm/page-cluster
-else
-    arch_type=`uname -m`
-    MemTotalStr=`cat /proc/meminfo | grep MemTotal`
-    MemTotal=${MemTotalStr:16:8}
-
-        # Set PPR parameters
-        if [ -f /sys/devices/soc0/soc_id ]; then
-            soc_id=`cat /sys/devices/soc0/soc_id`
-        else
-            soc_id=`cat /sys/devices/system/soc/soc0/id`
-        fi
-
-        case "$soc_id" in
-          # Do not set PPR parameters for premium targets
-          # sdm845 - 321, 341
-          # msm8998 - 292, 319
-          # msm8996 - 246, 291, 305, 312
-          # channel - 349 (IKSWQ-54948)
-          "321" | "341" | "292" | "319" | "246" | "291" | "305" | "312" | "349")
-            ;;
-          *)
-            #Set PPR parameters for all other targets.
-            echo $set_almk_ppr_adj > /sys/module/process_reclaim/parameters/min_score_adj
-            echo 1 > /sys/module/process_reclaim/parameters/enable_process_reclaim
-            echo 50 > /sys/module/process_reclaim/parameters/pressure_min
-            echo 70 > /sys/module/process_reclaim/parameters/pressure_max
-            echo 30 > /sys/module/process_reclaim/parameters/swap_opt_eff
-            echo 512 > /sys/module/process_reclaim/parameters/per_swap_size
-            ;;
-        esac
-    fi
-
-    # Set allocstall_threshold to 0 for all targets.
-    # Set swappiness to 100 for all targets
-    echo 0 > /sys/module/vmpressure/parameters/allocstall_threshold
-
-    # Disable wsf for all targets beacause we are using efk.
-    # wsf Range : 1..1000 So set to bare minimum value 1.
-    echo 1 > /proc/sys/vm/watermark_scale_factor
-
-    configure_zram_parameters
-
-    configure_read_ahead_kb_values
-
-    enable_swap
-fi
 }
 
 function enable_memory_features()
@@ -1319,8 +1273,6 @@ case "$target" in
             fi
             ;;
         esac
-        # Set Memory parameters
-        configure_memory_parameters
     ;;
 esac
 
@@ -1496,9 +1448,6 @@ case "$target" in
                 echo 1 > /sys/module/lpm_levels/lpm_workarounds/dynamic_clock_gating
                 # Enable timer migration to little cluster
                 echo 1 > /proc/sys/kernel/power_aware_timer_migration
-
-                # Set Memory parameters
-                configure_memory_parameters
 
             ;;
             *)
@@ -1701,9 +1650,6 @@ case "$target" in
                 echo 110 > /proc/sys/kernel/sched_grp_downmigrate
                 echo   1 > /proc/sys/kernel/sched_enable_thread_grouping
 
-                # Set Memory parameters
-                configure_memory_parameters
-
             ;;
         esac
         #Enable Memory Features
@@ -1888,8 +1834,6 @@ case "$target" in
                 echo 85 > /proc/sys/kernel/sched_upmigrate
                 echo 85 > /proc/sys/kernel/sched_downmigrate
 
-                # Set Memory parameters
-                configure_memory_parameters
             ;;
         esac
         case "$soc_id" in
@@ -2032,9 +1976,6 @@ case "$target" in
             # Enable low power modes
             echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
 
-            # Set Memory parameters
-            configure_memory_parameters
-
             # Setting b.L scheduler parameters
             echo 76 > /proc/sys/kernel/sched_downmigrate
             echo 86 > /proc/sys/kernel/sched_upmigrate
@@ -2163,8 +2104,6 @@ case "$target" in
                 echo 1 > /sys/module/lpm_levels/lpm_workarounds/dynamic_clock_gating
                 # Enable timer migration to little cluster
                 echo 1 > /proc/sys/kernel/power_aware_timer_migration
-                # Set Memory parameters
-                configure_memory_parameters
                 ;;
                 *)
                 ;;
@@ -2264,8 +2203,6 @@ case "$target" in
                 echo 1 > /sys/module/lpm_levels/lpm_workarounds/dynamic_clock_gating
                 # Enable timer migration to little cluster
                 echo 1 > /proc/sys/kernel/power_aware_timer_migration
-                # Set Memory parameters
-                configure_memory_parameters
             ;;
             *)
 
@@ -2389,9 +2326,6 @@ case "$target" in
                      echo 1 > /sys/devices/system/cpu/cpu3/online
                  ;;
                 esac
-
-                # Set Memory parameters
-                configure_memory_parameters
 
                 #disable sched_boost
                 echo 0 > /proc/sys/kernel/sched_boost
@@ -2552,9 +2486,6 @@ case "$target" in
 
             # re-enable thermal and BCL hotplug
             echo 1 > /sys/module/msm_thermal/core_control/enabled
-
-            # Set Memory parameters
-            configure_memory_parameters
 
             # Enable bus-dcvs
             for cpubw in /sys/class/devfreq/*qcom,cpubw*
@@ -2721,9 +2652,6 @@ case "$target" in
                 echo -n enable > $mode
             done
 
-            # Set Memory parameters
-            configure_memory_parameters
-
             # Enable bus-dcvs
             for cpubw in /sys/class/devfreq/*qcom,cpubw*
             do
@@ -2825,9 +2753,6 @@ case "$target" in
 
       echo "0:1209600" > /sys/module/cpu_boost/parameters/input_boost_freq
       echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
-
-      # Set Memory parameters
-      configure_memory_parameters
 
       # Enable bus-dcvs
       for cpubw in /sys/class/devfreq/*qcom,cpubw*
@@ -2952,9 +2877,6 @@ case "$target" in
             echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
             echo 85 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/hispeed_load
             echo 85 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_load
-
-            # Set Memory parameters
-            configure_memory_parameters
 
             # Enable bus-dcvs
             ddr_type=`od -An -tx /proc/device-tree/memory/ddr_device_type`
@@ -3096,9 +3018,6 @@ case "$target" in
       echo "0:1209600" > /sys/module/cpu_boost/parameters/input_boost_freq
       echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
 
-      # Set Memory parameters
-      configure_memory_parameters
-
       # Enable bus-dcvs
       for device in /sys/devices/platform/soc
       do
@@ -3216,9 +3135,6 @@ case "$target" in
 
             echo "0:1248000" > /sys/module/cpu_boost/parameters/input_boost_freq
             echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
-
-            # Set Memory parameters
-            configure_memory_parameters
 
             # Enable bus-dcvs
             for device in /sys/devices/platform/soc
@@ -3381,9 +3297,6 @@ case "$target" in
 
     echo "0:1228800" > /sys/devices/system/cpu/cpu_boost/input_boost_freq
     echo 120 > /sys/devices/system/cpu/cpu_boost/input_boost_ms
-
-    # Set Memory parameters
-    configure_memory_parameters
 
     if [ `cat /sys/devices/soc0/revision` == "2.0" ]; then
          # r2.0 related changes
@@ -3568,9 +3481,6 @@ case "$target" in
     echo "0:1248000" > /sys/module/cpu_boost/parameters/input_boost_freq
     echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
 
-    # Set Memory parameters
-    configure_memory_parameters
-
     # Enable bus-dcvs
     for device in /sys/devices/platform/soc
     do
@@ -3721,9 +3631,6 @@ case "$target" in
             echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
             echo 85 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/hispeed_load
             echo 85 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_load
-
-            # Set Memory parameters
-            configure_memory_parameters
 
             # Enable bus-dcvs
             ddr_type=`od -An -tx /proc/device-tree/memory/ddr_device_type`
@@ -4301,8 +4208,6 @@ case "$target" in
         # Starting io prefetcher service
         start iop
 
-        # Set Memory parameters
-        configure_memory_parameters
     ;;
 esac
 
@@ -4657,7 +4562,6 @@ case "$target" in
     esac
 
     echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
-    configure_memory_parameters
     target_type=`getprop ro.hardware.type`
 	if [ "$target_type" == "automotive" ]; then
            # update frequencies
@@ -4893,7 +4797,6 @@ case "$target" in
         fi
 
     echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
-    configure_memory_parameters
     ;;
 esac
 
@@ -5105,7 +5008,6 @@ case "$target" in
 	    done
 	done
     echo N > /sys/module/lpm_levels/parameters/sleep_disabled
-    configure_memory_parameters
     ;;
 esac
 
@@ -5261,8 +5163,6 @@ case "$target" in
         echo 0-3 > /dev/cpuset/system-background/cpus
         echo 0 > /proc/sys/kernel/sched_boost
 
-        # Set Memory parameters
-        configure_memory_parameters
     ;;
 esac
 
@@ -5349,7 +5249,6 @@ case "$target" in
         done
 
         # Set Memory parameters
-        configure_memory_parameters
         restorecon -R /sys/devices/system/cpu
 	;;
 esac
