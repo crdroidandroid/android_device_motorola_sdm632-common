@@ -72,6 +72,10 @@ function blob_fixup() {
             [ "$2" = "" ] && return 0
             sed -i "s/ro.product.manufacturer/ro.product.nopefacturer/" "${2}"
             ;;
+        vendor/etc/data/dsi_config.xml|vendor/etc/data/netmgr_config.xml)
+            [ "$2" = "" ] && return 0
+            fix_xml "${2}"
+            ;;
         # Fix missing symbols
         vendor/lib64/libril-qc-hal-qmi.so)
             [ "$2" = "" ] && return 0
