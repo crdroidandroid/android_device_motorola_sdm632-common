@@ -124,7 +124,6 @@ TARGET_RECOVERY_DEVICE_MODULES := libinit_sdm632
 
 # Jemalloc
 MALLOC_SVELTE := true
-MALLOC_SVELTE_FOR_LIBC32 := true
 
 # Kernel
 BOARD_KERNEL_CMDLINE += androidboot.hardware=qcom ehci-hcd.park=3 lpm_levels.sleep_disabled=1
