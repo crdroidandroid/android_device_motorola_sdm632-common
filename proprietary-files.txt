@@ -275,7 +275,6 @@ vendor/lib/libadreno_utils.so
 vendor/lib/libc2d30_bltlib.so
 vendor/lib/libgsl.so
 vendor/lib/libllvm-glnext.so
-vendor/lib/libllvm-qcom.so
 vendor/lib/libsdedrm.so
 vendor/lib/libsdm-color.so
 vendor/lib/libsdm-diag.so
@@ -300,7 +299,6 @@ vendor/lib64/libadreno_utils.so
 vendor/lib64/libc2d30_bltlib.so
 vendor/lib64/libgsl.so
 vendor/lib64/libllvm-glnext.so
-vendor/lib64/libllvm-qcom.so
 vendor/lib64/libsdedrm.so
 vendor/lib64/libsdm-color.so
 vendor/lib64/libsdm-diag.so
