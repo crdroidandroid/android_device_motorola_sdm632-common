@@ -160,7 +160,6 @@ PRODUCT_PACKAGES += \
     libgeofencing \
     libgnss \
     libgnsspps \
-    libsynergy_loc_api \
     libwifi-hal-ctrl
 
 PRODUCT_PACKAGES += \
